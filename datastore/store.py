@@ -1,7 +1,7 @@
 from gluon import *
 from pydal import DAL, Field
 from pydal import validators as v
-uri = 'sqlite://storage.sqlite'
+uri = 'sqlite://data/storage.sqlite'
 
 db = DAL(uri, pool_size=10, migrate_enabled=True,check_reserved=['all'])
 db.define_table('ltopic',
@@ -24,4 +24,10 @@ db.define_table('lmessage',
                 Field('creation_date','datetime'),
                 Field('arrival_date','datetime'),
                 
+                )
+db.define_table('lrouter',
+                Field('area','string'),
+                Field('via_call','string'),
+                Field('to_call','string'),
+                Field('rstate','string',requires=v.IS_IN_SET(('A','N'))),
                 )

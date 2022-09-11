@@ -5,6 +5,10 @@ import logging
 import time
 logging.basicConfig(filename='liter.log', encoding='utf-8', level=logging.DEBUG)
 
+# setting up datastore
+ds.uri = cfg.store_path
+db = ds.db
+
 def run():
     RUN = True
     while RUN:
