@@ -16,6 +16,7 @@ db.define_table('lresource',
                 Field('source_call','string'),
                 Field('resource_name','string'),
                 Field('topic',requires=v.IS_IN_DB(db, 'ltopic.rid', '%(name)s')),
+                Field('lpath','text'),
                 Field('stamp','datetime', default=dt.datetime.now())
                 )
 db.define_table('lmessage',

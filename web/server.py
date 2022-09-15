@@ -38,7 +38,7 @@ class API_welcome(RequestHandler):
         self.write({'message': cnt})
     def post(self):
         row = js.loads(self.request.body.decode('utf-8'))
-        print (type(row))
+        #print (type(row))
         if 'call' in row:
             # remove any prevoious sessions
             db(db.lsession.lcall==row['call']).delete()
@@ -50,10 +50,45 @@ class API_welcome(RequestHandler):
         else:
             self.write({'message': 'Invalid request'})
 class API_topic(RequestHandler):
-    def get(self):
-        pass
+    def get(self,param):
+        '''
+        param can be:
+        LA - listing all topics with ids
+        GN - get id by name or returns 404
+        ID= - get all topic data by suplied ID
+        '''
+        if param == 'LA':
+            message = []
+            rows = db(db.ltopic.id>0).select()
+            for r in rows:
+                message.append(dict(id=r.rid, topic_name=r.topic_name, description=r.description))
+            self.write(dict(message=message))
+
+        elif param[0:2] == 'GN':
+            pass
+        elif param[0:3] == 'ID=':
+            message=[]
+            id = param[3:]
+            r= db(db.ltopic.rid==id).select().first()
+            message.append(dict(id=r.rid, topic_name=r.topic_name, description=r.description))
+            self.write(dict(message=message))
+
+        else:
+            raise tornado.web.HTTPError(400)
     def post(self):
-        pass
+        message='OK'
+        row = js.loads(self.request.body.decode('utf-8'))
+        if 'sid' in row:
+            sid = row['sid']
+        # checking if session is registered
+            il = db(db.session.lsid==sid).count()
+            if il>0:
+                db.ltopic.insert(rid=new_rid(),topic_name=row['topic_name'], description=row['description'])
+        else:
+            message = 'No session id'
+            self.write(dict(message=message))
+
+
 class API_resource(RequestHandler):
     def get(self):
         pass
@@ -64,8 +99,8 @@ def make_app():
     urls=[
         ("/", Index),
         ("/api/welcome",API_welcome),
-        ("/api/topic",API_topic),
-        ("/api/resource",API_resource)]
+        ("/api/topic/([^/]+)",API_topic),
+        ("/api/resource/([^/]+)",API_resource)]
     return Application(urls, debug=True)
 
 def run():
